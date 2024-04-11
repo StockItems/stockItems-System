@@ -16,15 +16,16 @@ exports.Tools = database_1.sequelize.define('tools', {
         defaultValue: "",
         field: "name",
     },
-    date: {
-        type: sequelize_1.DataTypes.DATE,
-        allowNull: false,
-        field: "date",
-    },
     count: {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,
         field: "count",
         defaultValue: 0,
     },
+    note: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "",
+        field: "note",
+    }
 });

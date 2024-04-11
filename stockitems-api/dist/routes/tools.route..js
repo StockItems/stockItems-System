@@ -8,18 +8,10 @@ const tools_controller_1 = __importDefault(require("../controllers/tools.control
 const router = (0, express_1.Router)();
 router.post('/createTools', tools_controller_1.default.createTools);
 router.get("/gettools", tools_controller_1.default.getTools);
-// router.get('/getFireExtinguisherById',  toolsController.getF);
+router.get('/self', tools_controller_1.default.self);
+router.put('/self', tools_controller_1.default.updateToolsSelf);
 router.get('/', tools_controller_1.default.getTools);
-// router.get(
-//     '/:id',
-//     toolsController.getFireExtinguisherById
-// );
-// router.put(
-//     '/:id',
-//     toolsController.updateTools
-// );
-// router.delete(
-//     "/:id", 
-//     toolsController.deleteTools
-//     );
+router.get('/:id', tools_controller_1.default.getToolsById);
+router.put('/:id', tools_controller_1.default.updateTools);
+router.delete("/:id", tools_controller_1.default.deleteTools);
 exports.default = router;

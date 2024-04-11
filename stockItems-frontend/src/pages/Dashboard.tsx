@@ -1,0 +1,308 @@
+import { useEffect, useState } from "react";
+import {
+  Typography,
+  TableContainer,
+  Paper,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Button,
+  TablePagination,
+  Box,
+  Dialog,
+  TextField,
+} from "@mui/material";
+import { Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import { axiosInstance } from "../axiosRequest";
+import Search from "../components/Search";
+import dayjs from "dayjs";
+import 'dayjs/locale/th';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DeleteConfirmationDialog from "../components/Delete";
+import { ITools } from "../interface/tools.interface";
+import EditIcon from '@mui/icons-material/Edit';
+
+const Dashboard = () => {
+  const [listTools, setListTools] = useState<ITools[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [search, setSearch] = useState<string>("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [toolToDelete, setToolToDelete] = useState<number | null>(null);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [quantityToAdd, setQuantityToAdd] = useState("");
+  const [toolToAdd, setToolToAdd] = useState<number | null>(null);
+  const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
+  const [quantityToRemove, setQuantityToRemove] = useState("");
+  const [toolToRemove, setToolToRemove] = useState<number | null>(null);
+
+  
+  
+
+
+
+
+  dayjs.extend(localizedFormat);
+  dayjs.locale('th');
+
+
+  useEffect(() => {
+    fetchToolsData();
+  }, []);
+
+  const fetchToolsData = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get("/tools/");
+      setListTools(response.data.items || []);
+    } catch (error) {
+      console.error("Error fetching tools:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+
+  // const handleRemoveTool = async (id: number) => {
+  //   try {
+  //     const tool = listTools.find(tool => tool.id === id);
+  //     if (tool) { // ตรวจสอบว่า tool ไม่เป็น undefined
+  //       await axiosInstance.put(`/tools/${id}`, {
+  //         count: tool.count - 1
+  //       });
+  //       fetchToolsData();
+  //     } else {
+  //       console.error("Tool not found with id:", id);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error editing tool:", error);
+  //   }
+  // };
+
+  const handleDeleteConfirmationOpen = (id: number) => {
+    setToolToDelete(id);
+    setDeleteConfirmationOpen(true);
+  };
+
+  const handleDeleteConfirmationClose = () => {
+    setDeleteConfirmationOpen(false);
+    setToolToDelete(null);
+  };
+
+  const handleDeleteTool = async () => {
+    if (toolToDelete !== null) {
+      try {
+        await axiosInstance.delete(`/tools/${toolToDelete}`);
+        fetchToolsData();
+      } catch (error) {
+        console.error("Error deleting tool:", error);
+      } finally {
+        handleDeleteConfirmationClose();
+      }
+    }
+  };
+
+  const filteredTools = listTools.filter(item =>
+    item.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleChangePage = (
+    _event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 5));
+    setPage(0);
+  };
+
+  const handleAddQuantityConfirm = async () => {
+    if (toolToAdd !== null && quantityToAdd !== "") {
+      try {
+        const tool = listTools.find(tool => tool.id === toolToAdd);
+        if (tool) { 
+          await axiosInstance.put(`/tools/${toolToAdd}`, {
+            count: tool.count + parseInt(quantityToAdd)
+          });
+          fetchToolsData();
+        } else {
+          console.error("Tool not found with id:", toolToAdd);
+        }
+      } catch (error) {
+        console.error("Error editing tool:", error);
+      } finally {
+        setOpenAddDialog(false);
+      }
+    }
+  };
+
+  const handleRemoveQuantityConfirm = async () => {
+    if (toolToRemove !== null && quantityToRemove !== "") {
+      try {
+        const tool = listTools.find(tool => tool.id === toolToRemove);
+        if (tool) { 
+          await axiosInstance.put(`/tools/${toolToRemove}`, {
+            count: tool.count - parseInt(quantityToRemove)
+          });
+          fetchToolsData();
+        } else {
+          console.error("Tool not found with id:", toolToRemove);
+        }
+      } catch (error) {
+        console.error("Error editing tool:", error);
+      } finally {
+        setOpenRemoveDialog(false);
+      }
+    }
+  };
+
+  
+  return (
+    <>
+      <Navbar>
+        {loading ? (
+          <Typography>Loading...</Typography>
+        ) : (
+          <>
+            <TableContainer component={Paper}>
+              <Box sx={{ display: 'flex' }}>
+                <Search value={search} onChange={(text) => setSearch(text)} />
+              </Box>
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center">id</TableCell>
+                    <TableCell align="center">ชื่ออุปกรณ์</TableCell>
+                    <TableCell align="center">จำนวน</TableCell>
+                    <TableCell align="center">หมายเหตุ</TableCell>
+                    <TableCell align="center">วันที่เพิ่ม</TableCell>
+                    <TableCell align="center">แก้ไขข้อมูล</TableCell>
+                    <TableCell align="center">เพิ่ม/ลบ</TableCell>
+                    <TableCell align="center">ลบอุปกรณ์</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredTools
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell component="th" scope="row" align="center">
+                          {item.id}
+                        </TableCell>
+                        <TableCell align="center">{item.name}</TableCell>
+                        <TableCell align="center">{item.count}</TableCell>
+                        <TableCell align="center">{item.note}</TableCell>
+                        <TableCell align="center">
+                          {dayjs(item.updateAt).format('DD MMMM YYYY')}
+                        </TableCell>
+                        <TableCell align="center">
+                        <Link to={`/editItem/${item.id}`}>
+                          <Button variant="outlined" color="primary">
+                            <EditIcon/>
+                          </Button>
+                        </Link>
+                      </TableCell>
+                        <TableCell align="center">
+                          <Button
+                            variant="outlined"
+                            color="success"
+                            onClick={() => {
+                              setToolToAdd(item.id);
+                              setOpenAddDialog(true);
+                            }}
+                          >
+                            เพิ่ม
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="warning"
+                            onClick={() => { setToolToRemove(item.id)
+                              setOpenRemoveDialog(true);
+                            }}
+                          >
+                            ลบ
+                          </Button>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={() => handleDeleteConfirmationOpen(item.id)}
+                          >
+                            <DeleteForeverIcon />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Box>
+              <TablePagination
+                rowsPerPageOptions={[5]}
+                component="div"
+                count={filteredTools.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Box>
+          </>
+        )}
+        <Link to="/addItem">
+          <Button variant="outlined" color="secondary" sx={{ textAlign: "center" }}>
+            เพิ่มอุปกรณ์ที่นี่
+          </Button>
+        </Link>
+        <DeleteConfirmationDialog
+          open={deleteConfirmationOpen}
+          onClose={handleDeleteConfirmationClose}
+          onConfirm={handleDeleteTool}
+        />
+        <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+          <Box p={2}>
+            <Typography variant="h6">เพิ่มจำนวนอุปกรณ์</Typography>
+            <TextField
+              label="จำนวนที่ต้องการเพิ่ม"
+              type="number"
+              value={quantityToAdd}
+              onChange={(e) => setQuantityToAdd(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+            <Button onClick={() => setOpenAddDialog(false)}>ยกเลิก</Button>
+            <Button onClick={() => handleAddQuantityConfirm()}>ยืนยัน</Button>
+          </Box>
+        </Dialog>
+        
+        <Dialog open={openRemoveDialog} onClose={() => setOpenRemoveDialog(false)}>
+          <Box p={2}>
+            <Typography variant="h6">เพิ่มจำนวนอุปกรณ์</Typography>
+            <TextField
+              label="จำนวนที่ต้องการเพิ่ม"
+              type="number"
+              value={quantityToRemove}
+              onChange={(e) => setQuantityToRemove(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+            <Button onClick={() => setOpenRemoveDialog(false)}>ยกเลิก</Button>
+            <Button onClick={() => handleRemoveQuantityConfirm()}>ยืนยัน</Button>
+          </Box>
+        </Dialog>
+
+      </Navbar>
+    </>
+  );
+};
+
+export default Dashboard;

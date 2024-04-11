@@ -14,15 +14,16 @@ export const Tools = sequelize.define('tools', {
         defaultValue: "",
         field: "name",
     },
-    date: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        field: "date",
-    },
     count: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: "count",
         defaultValue: 0,
     },
+    note: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "",
+        field: "note",
+    }
 })

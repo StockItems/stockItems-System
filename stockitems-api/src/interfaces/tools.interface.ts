@@ -3,7 +3,7 @@ import { NextFunction, Request ,Response } from "express";
 export interface ITools {
     id: number;
     name: string;
-    date: string;
+    note: string;
     count: number;
 
 }

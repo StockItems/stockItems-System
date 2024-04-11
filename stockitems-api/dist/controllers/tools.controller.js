@@ -15,12 +15,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 const tools_model_1 = require("../models/tools.model");
 dotenv_1.default.config();
+const self = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    return res.status(200).json(req.tools);
+});
 const createTools = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, date, count, } = req.body;
+        const { name, count, note, } = req.body;
+        const exitTools = yield tools_model_1.Tools.findOne({
+            where: { name },
+        });
+        if (exitTools) {
+            return res.status(400).json({
+                message: `There is already a name ${name}.`,
+            });
+        }
         const data = {
             name,
-            date,
+            note,
             count,
         };
         const toolsCreate = yield tools_model_1.Tools.create(Object.assign({}, data));
@@ -48,13 +59,28 @@ const getTools = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
     }
 });
+const getToolsById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const tools = req.tools;
+        const { id } = req.params;
+        const findToolsById = yield tools_model_1.Tools.findAll({
+            where: {
+                id,
+            },
+        });
+        return res.status(200).json(findToolsById);
+    }
+    catch (_a) {
+        return res.status(500).json({ message: "Something went wrong" });
+    }
+});
 const updateTools = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const { name, date, count } = req.body;
+        const { name, note, count } = req.body;
         const updateTools = yield tools_model_1.Tools.update({
             name,
-            date,
+            note,
             count,
         }, {
             where: {
@@ -67,21 +93,25 @@ const updateTools = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.status(500).json({ massage: "Something went wrong " });
     }
 });
+const updateToolsSelf = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const tools = req.tools;
+    const { name, note, count, } = req.body;
+});
 const deleteTools = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const tools = req.tools;
         const deleteTools = yield tools_model_1.Tools.findOne({
             where: {
-                id,
+                id
             },
         });
         if (!deleteTools) {
             return res.status(404).json({
                 message: "Tools Note found",
             });
-            yield (deleteTools === null || deleteTools === void 0 ? void 0 : deleteTools.destroy());
         }
+        yield (deleteTools === null || deleteTools === void 0 ? void 0 : deleteTools.destroy());
         return res.status(200).json({
             message: "Tools Deleted",
         });
@@ -97,4 +127,7 @@ exports.default = {
     getTools,
     updateTools,
     deleteTools,
+    self,
+    updateToolsSelf,
+    getToolsById,
 };

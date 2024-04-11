@@ -5,29 +5,36 @@ import {ITools, RequsetAndTools} from "../interfaces/tools.interface"
 import { Model } from "sequelize";
 import { Tools } from "../models/tools.model";
 
-
-
 dotenv.config();
 
- 
-
-
+const self = async (req: RequsetAndTools, res: Response) => {
+    return res.status(200).json(req.tools);
+  };
 
 const createTools = async (req: Request, res: Response) => {
     try {
       const {
         name,
-        date,
         count,
+        note,
       }: {
         name: string;
-        date: string;
+        note: string;
         count: string;
       } = req.body;
+
+      const exitTools: Model<ITools> | null = await Tools.findOne({
+        where: { name },
+      });
+      if (exitTools) {
+        return res.status(400).json({
+          message: `There is already a name ${name}.`,
+        });
+      }
   
       const data = {
         name,
-        date,
+        note,
         count,
       };
       const toolsCreate: Model<ITools> | null = await Tools.create({
@@ -60,16 +67,32 @@ const getTools = async (req: RequsetAndTools, res: Response) => {
     }
 };
 
+const getToolsById = async (req: RequsetAndTools, res: Response) => {
+    try {
+        const tools: ITools = req.tools!;
+        const { id } = req.params;
+        const findToolsById: Model<ITools>[] | null = await Tools.findAll({
+            where: {
+                id,
+            },
+            
+        })
+        return res.status(200).json(findToolsById);
+}catch {
+    return res.status(500).json({ message: "Something went wrong" });
+}
+};
+
 
 
 const updateTools = async (req: RequsetAndTools, res: Response) => {
     try {
         const { id } = req.params;
-        const { name, date, count} = req.body;
+        const { name, note, count} = req.body;
         const updateTools: any = await Tools.update(
             {
                 name,
-                date,
+                note,
                 count,
             },
             {
@@ -85,6 +108,21 @@ const updateTools = async (req: RequsetAndTools, res: Response) => {
     }
 };
 
+const updateToolsSelf = async (req: RequsetAndTools, res: Response) => {
+    const tools: ITools = req.tools!;
+    const {
+        name,
+        note,
+        count,
+    }: {
+        name?: string;
+        note?: string;
+        count?: string;
+    } = req.body;
+}
+
+
+
 
 
 const deleteTools = async (req: RequsetAndTools, res: Response) => {
@@ -94,7 +132,7 @@ const deleteTools = async (req: RequsetAndTools, res: Response) => {
 
         const deleteTools: null | Model<ITools> = await Tools.findOne({
             where: {
-                id,
+                id
             },
         });
 
@@ -102,9 +140,9 @@ const deleteTools = async (req: RequsetAndTools, res: Response) => {
             return res.status(404).json({
                 message: "Tools Note found",
             });
-            
-            await deleteTools?.destroy();
         }
+            await deleteTools?.destroy();
+        
         return res.status(200).json({
             message: "Tools Deleted",
         });
@@ -121,4 +159,8 @@ export default {
     getTools,
     updateTools,
     deleteTools,
-};
+    self,
+    updateToolsSelf,
+    getToolsById,
+
+}
