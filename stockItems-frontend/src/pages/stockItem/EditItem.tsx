@@ -2,26 +2,15 @@ import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useParams } from 'react-router-dom';
-
-import { Container, CssBaseline, Box, Avatar, Typography, Grid, TextField, Button } from "@mui/material";
+import { Container, CssBaseline, Box, Typography, Grid, TextField, Button } from "@mui/material";
 import { axiosInstance } from "../../axiosRequest";
 import Navbar from "../../components/Navbar";
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 
-// const validationSchema = Yup.object({
-//   code: Yup.string()
-//     .min(3, 'กรุณากรอกอักขระ 3 ตัวขึ้นไป')
-//     .max(8, 'กรุณากรอกอักขระไม่เกิน 8 ตัวอักษร')
-//     .required('กรุณากรอกโค้ดเนม'),
-//   location: Yup.string()
-//     .min(8, 'กรุณากรอกอักขระ 8 ตัวขึ้นไป')
-//     .required('กรุณากรอกตำแหน่ง'),
-// });
-
 const EditItem = () => {
   const { id } = useParams();
- 
-  
+
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -35,7 +24,7 @@ const EditItem = () => {
       formik.setValues({
         name: item.name,
         note: item.note,
-       
+
       });
     } catch (error) {
       console.log(error);
@@ -77,9 +66,9 @@ const EditItem = () => {
             alignItems: "center",
           }}
         >
-         
-         <AutoFixHighIcon/>
-         
+
+          <AutoFixHighIcon />
+
           <Typography component="h1" variant="h5">
             แก้ไขชื่อและจำนวนของอุปกรณ์
           </Typography>
@@ -103,7 +92,7 @@ const EditItem = () => {
                   value={formik.values.name}
                   helperText={formik.errors.name}
                   onBlur={formik.handleBlur}
-               
+
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -115,9 +104,9 @@ const EditItem = () => {
                   name="note"
                   onChange={formik.handleChange}
                   value={formik.values.note}
-                  helperText={ formik.errors.note}
+                  helperText={formik.errors.note}
                   onBlur={formik.handleBlur}
-              
+
                 />
               </Grid>
             </Grid>

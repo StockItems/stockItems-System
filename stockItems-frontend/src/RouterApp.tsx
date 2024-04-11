@@ -1,13 +1,12 @@
 import Dashboard from "./pages/Dashboard";
 import AddItem from "./pages/stockItem/AddItem";
 import EditItem from "./pages/stockItem/EditItem";
-import Navbar from "./components/Navbar";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 
 type Props = {}
 
-const RouterApp = (props: Props) => {
+const RouterApp = (_props: Props) => {
     return (
         <>
             <BrowserRouter>

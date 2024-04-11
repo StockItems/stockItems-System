@@ -2,13 +2,12 @@ import {
   Box,
   TextField,
   Button,
-  Avatar,
   Container,
   CssBaseline,
   Grid,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { axiosInstance } from "../../axiosRequest";
