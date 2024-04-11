@@ -11,8 +11,7 @@ import {
   Button,
   TablePagination,
   Box,
-  Dialog,
-  TextField,
+ 
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -25,6 +24,9 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import DeleteConfirmationDialog from "../components/Delete";
 import { ITools } from "../interface/tools.interface";
 import EditIcon from '@mui/icons-material/Edit';
+import AddQuantityDialog from "../components/AddQuantityDialog";
+import RemoveQuantityDialog from "../components/RemoveQuantityDialog";
+
 
 const Dashboard = () => {
   const [listTools, setListTools] = useState<ITools[]>([]);
@@ -40,11 +42,6 @@ const Dashboard = () => {
   const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
   const [quantityToRemove, setQuantityToRemove] = useState("");
   const [toolToRemove, setToolToRemove] = useState<number | null>(null);
-
-  
-  
-
-
 
 
   dayjs.extend(localizedFormat);
@@ -66,24 +63,6 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-  
-
-  // const handleRemoveTool = async (id: number) => {
-  //   try {
-  //     const tool = listTools.find(tool => tool.id === id);
-  //     if (tool) { // ตรวจสอบว่า tool ไม่เป็น undefined
-  //       await axiosInstance.put(`/tools/${id}`, {
-  //         count: tool.count - 1
-  //       });
-  //       fetchToolsData();
-  //     } else {
-  //       console.error("Tool not found with id:", id);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error editing tool:", error);
-  //   }
-  // };
 
   const handleDeleteConfirmationOpen = (id: number) => {
     setToolToDelete(id);
@@ -128,7 +107,7 @@ const Dashboard = () => {
     if (toolToAdd !== null && quantityToAdd !== "") {
       try {
         const tool = listTools.find(tool => tool.id === toolToAdd);
-        if (tool) { 
+        if (tool) {
           await axiosInstance.put(`/tools/${toolToAdd}`, {
             count: tool.count + parseInt(quantityToAdd)
           });
@@ -148,7 +127,7 @@ const Dashboard = () => {
     if (toolToRemove !== null && quantityToRemove !== "") {
       try {
         const tool = listTools.find(tool => tool.id === toolToRemove);
-        if (tool) { 
+        if (tool) {
           await axiosInstance.put(`/tools/${toolToRemove}`, {
             count: tool.count - parseInt(quantityToRemove)
           });
@@ -164,7 +143,7 @@ const Dashboard = () => {
     }
   };
 
-  
+
   return (
     <>
       <Navbar>
@@ -204,12 +183,12 @@ const Dashboard = () => {
                           {dayjs(item.updateAt).format('DD MMMM YYYY')}
                         </TableCell>
                         <TableCell align="center">
-                        <Link to={`/editItem/${item.id}`}>
-                          <Button variant="outlined" color="primary">
-                            <EditIcon/>
-                          </Button>
-                        </Link>
-                      </TableCell>
+                          <Link to={`/editItem/${item.id}`}>
+                            <Button variant="outlined" color="primary">
+                              <EditIcon />
+                            </Button>
+                          </Link>
+                        </TableCell>
                         <TableCell align="center">
                           <Button
                             variant="outlined"
@@ -224,7 +203,8 @@ const Dashboard = () => {
                           <Button
                             variant="outlined"
                             color="warning"
-                            onClick={() => { setToolToRemove(item.id)
+                            onClick={() => {
+                              setToolToRemove(item.id)
                               setOpenRemoveDialog(true);
                             }}
                           >
@@ -268,37 +248,21 @@ const Dashboard = () => {
           onClose={handleDeleteConfirmationClose}
           onConfirm={handleDeleteTool}
         />
-        <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-          <Box p={2}>
-            <Typography variant="h6">เพิ่มจำนวนอุปกรณ์</Typography>
-            <TextField
-              label="จำนวนที่ต้องการเพิ่ม"
-              type="number"
-              value={quantityToAdd}
-              onChange={(e) => setQuantityToAdd(e.target.value)}
-              fullWidth
-              margin="normal"
-            />
-            <Button onClick={() => setOpenAddDialog(false)}>ยกเลิก</Button>
-            <Button onClick={() => handleAddQuantityConfirm()}>ยืนยัน</Button>
-          </Box>
-        </Dialog>
-        
-        <Dialog open={openRemoveDialog} onClose={() => setOpenRemoveDialog(false)}>
-          <Box p={2}>
-            <Typography variant="h6">เพิ่มจำนวนอุปกรณ์</Typography>
-            <TextField
-              label="จำนวนที่ต้องการเพิ่ม"
-              type="number"
-              value={quantityToRemove}
-              onChange={(e) => setQuantityToRemove(e.target.value)}
-              fullWidth
-              margin="normal"
-            />
-            <Button onClick={() => setOpenRemoveDialog(false)}>ยกเลิก</Button>
-            <Button onClick={() => handleRemoveQuantityConfirm()}>ยืนยัน</Button>
-          </Box>
-        </Dialog>
+        <AddQuantityDialog
+          open={openAddDialog}
+          onClose={() => setOpenAddDialog(false)}
+          quantityToAdd={quantityToAdd}
+          setQuantityToAdd={setQuantityToAdd}
+          onConfirm={handleAddQuantityConfirm}
+        />
+
+        <RemoveQuantityDialog
+          open={openRemoveDialog}
+          onClose={() => setOpenRemoveDialog(false)}
+          quantityToRemove={quantityToRemove}
+          setQuantityToRemove={setQuantityToRemove}
+          onConfirm={handleRemoveQuantityConfirm}
+        />
 
       </Navbar>
     </>
